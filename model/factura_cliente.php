@@ -27,7 +27,7 @@ require_once 'plugins/facturacion_base/model/core/factura_cliente.php';
 class factura_cliente extends FacturaScripts\model\factura_cliente
 {
    
-	public function new_codigo() 
+    public function new_codigo() 
 	{
 
  /// buscamos el nÃºmero inicial para la serie
@@ -91,7 +91,7 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
    
       }
      
-         $this->codigo = $this->codserie.sprintf('%018s', $this->numero);
+         $this->codigo = $this->codserie.sprintf('%07s', $this->numero);
       
     }
 
