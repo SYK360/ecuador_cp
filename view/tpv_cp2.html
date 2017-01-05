@@ -1,0 +1,947 @@
+{include="header2"}
+
+<script type="text/javascript" src="{$fsc->get_js_location('tpv_tactil2.js')}"></script>
+<script type="text/javascript">
+   fs_nf0 = {#FS_NF0#};
+   tpv_url = '{$fsc->url()}';
+   cliente = {function="json_encode($fsc->cliente_s)"};
+   all_impuestos = {function="json_encode($fsc->impuesto->all())"};
+   irpf = {$fsc->serie->irpf};
+   
+   {if="$fsc->serie->siniva"}
+   siniva = true;
+   {/if}
+   
+   {if="$fsc->tesoreria"}
+   tesoreria = true;
+   {/if}
+   
+   {if="$fsc->comanda"}
+   usar_cache = false;
+   {/if}
+   
+   function pedir_pin(cod)
+   {
+      $("#modal_cambio_agente").hide();
+      
+      var pin = prompt('PIN');
+      if(pin != '')
+      {
+         window.location.href = "{$fsc->url()}&cambio_agente="+cod+"&pin="+pin;
+      }
+   }
+   $(document).ready(function() {
+      $("body").css('margin-top', 35);
+      
+      $("#ac_cliente").autocomplete({
+         serviceUrl: '{$fsc->url()}',
+         paramName: 'buscar_cliente',
+         onSelect: function (suggestion) {
+            if(suggestion)
+            {
+               if(document.f_tpv.cliente.value != suggestion.data && suggestion.data != '')
+               {
+                  document.f_tpv.cliente.value = suggestion.data;
+               }
+            }
+         }
+      });
+      
+      recalcular();
+      
+      {if="$fsc->movimiento"}
+      $("#modal_movimiento").modal('show');
+      document.f_movimiento.cantidad.focus();
+      {else}
+      document.f_tpv.codbar.focus();
+      {/if}
+   });
+</script>
+
+<form id="f_tpv" name="f_tpv" action="{$fsc->url()}" method="post">
+   <input type="hidden" name="petition_id" value="{$fsc->random_string()}"/>
+   <input type="hidden" id="numlineas" name="numlineas" value="0"/>
+   <input type="hidden" name="cliente" value="{$fsc->cliente_s->codcliente}"/>
+   <input type="hidden" name="almacen" value="{$fsc->terminal->codalmacen}"/>
+   <input type="hidden" name="serie" value="{$fsc->terminal->codserie}"/>
+   <input type="hidden" name="aparcar" value="FALSE"/>
+   <input type="hidden" name="preimprimir" value="FALSE"/>
+   {if="$fsc->comanda"}
+   <input type="hidden" name="idtpv_comanda" value="{$fsc->comanda->idtpv_comanda}"/>
+   {/if}
+   
+   <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container-fluid">
+         <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+               <span class="sr-only">Menú</span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="index.php">
+               <span class="glyphicon glyphicon-home"></span> &nbsp;
+               <span class="hidden-sm">{if="FS_DEMO"}DEMO{elseif="$fsc->empresa->nombrecorto"}{$fsc->empresa->nombrecorto}{else}{$fsc->empresa->nombre}{/if}</span>
+            </a>
+         </div>
+         <ul class="nav navbar-nav">
+            <li>
+               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  <span class="glyphicon glyphicon-print"></span>
+                  <span class="hidden-sm">&nbsp; {$fsc->terminal->nombre}</span>
+               </a>
+               <ul class="dropdown-menu">
+                  <li>
+                     <a href="{$fsc->arqueo->url()}">
+                        <span class="glyphicon glyphicon-inbox"></span>&nbsp; Arqueo...
+                     </a>
+                  </li>
+                  <li>
+                     <a href="index.php?page=tpv_caja#configuracion">
+                        <span class="glyphicon glyphicon-cog"></span>&nbsp; Configuración
+                     </a>
+                  </li>
+               </ul>
+            </li>
+            <li>
+               <a href="#" data-toggle="modal" data-target="#modal_cambio_agente">
+                  <span class="glyphicon glyphicon-user"></span>
+                  <span class="hidden-sm">&nbsp; {$fsc->agente->get_fullname()}</span>
+               </a>
+            </li>
+            <li class="dropdown">
+               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true">
+                  <span class="glyphicon glyphicon-th-large"></span>
+               </a>
+               <ul class="dropdown-menu">
+                  <li>
+                     <a href="{$fsc->url()}&articulos_grid=6x3">
+                        6 x 3 artículos
+                        {if="$fsc->articulos_grid=='6x3'"}
+                        <span class="glyphicon glyphicon-ok"></span>
+                        {/if}
+                     </a>
+                  </li>
+                  <li>
+                     <a href="{$fsc->url()}&articulos_grid=4x3">
+                        4 x 3 artículos
+                        {if="$fsc->articulos_grid=='4x3'"}
+                        <span class="glyphicon glyphicon-ok"></span>
+                        {/if}
+                     </a>
+                  </li>
+                  <li>
+                     <a href="{$fsc->url()}&articulos_grid=3x3">
+                        3 x 3 artículos
+                        {if="$fsc->articulos_grid=='3x3'"}
+                        <span class="glyphicon glyphicon-ok"></span>
+                        {/if}
+                     </a>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+         <ul class="nav navbar-nav navbar-right">
+            <li>
+               <a href="#" title="Nº de líneas en el carrito">
+                  Líneas: <b id="total_lineas">0</b>
+               </a>
+            </li>
+            <li>
+               <a href="#" title="Cantidad de artículos en el carrito">
+                  Uds: <b id="total_articulos">0</b>
+               </a>
+            </li>
+            <li>
+               <a href="#" class="btn-primary" onclick="save_modal();">
+                  <span class="glyphicon glyphicon-usd"></span>&nbsp; Cobrar
+               </a>
+            </li>
+            <li>
+               <a href="#" class="btn-warning" onclick="this.disabled=true;aparcar_ticket();">
+                  <span class="glyphicon glyphicon-hourglass"></span>&nbsp; Aparcar
+               </a>
+            </li>
+            <li>
+               <a class="navbar-brand" href="#">
+                  &nbsp; &nbsp; Total: <b><span id="tpv_total">{$fsc->show_precio(0)}</span></b>
+               </a>
+            </li>
+         </ul>
+      </div>
+   </nav>
+   
+   {if="!$fsc->get_messages()"}<br/>{/if}
+   
+   <div class="container-fluid">
+      <div class="row">
+         <div id="catalogo" class="col-sm-6">
+            <ul id="tabs_catalogo" class="nav nav-tabs" role="tablist">
+               <li role="presentation" class="active">
+                  <a href="#familias" aria-controls="familias" role="tab" data-toggle="tab">
+                     <span class="glyphicon glyphicon-folder-open"></span>
+                     <span class="hidden-xs">&nbsp; Familias</span>
+                  </a>
+               </li>
+               <li role="presentation">
+                  <a href="#articulos" aria-controls="articulos" role="tab" data-toggle="tab">
+                     <span class="glyphicon glyphicon-th-large"></span>
+                     <span class="hidden-xs">&nbsp; Artículos</span>
+                  </a>
+               </li>
+            </ul>
+            <br/>
+            <div class="tab-content">
+               <div role="tabpanel" class="tab-pane active" id="familias">
+                  <div class="container-fluid">
+                     <div class="row">
+                        {loop="$fsc->familias()"}
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                           <a href="#" class="thumbnail" onclick="return get_articulos('{$value->codfamilia}')">
+                              <img src="{$value->imagen_url()}" alt="{$value->codfamilia}"/>
+                              {$value->descripcion(12)}
+                           </a>
+                           <br/>
+                        </div>
+                        {else}
+                        <div class="col-sm-12">
+                           <div class="alert alert-warning">
+                              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                              &nbsp; Debes marcar las familias que quieres activar desde la
+                              <a href="index.php?page=tpv_caja#configuracion">configuración</a>.
+                           </div>
+                        </div>
+                        {/loop}
+                     </div>
+                  </div>
+               </div>
+               <div role="tabpanel" class="tab-pane" id="articulos">
+                  <div class="alert alert-info">
+                     <span class="glyphicon glyphicon-hand-up" aria-hidden="true"></span>
+                     &nbsp; Selecciona primero una familia.
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="col-sm-6">
+            <ul id="tabs_tpv" class="nav nav-tabs" role="tablist">
+               <li role="presentation" class="active">
+                  <a href="#home" aria-controls="home" role="tab" data-toggle="tab">
+                     <span class="glyphicon glyphicon-shopping-cart"></span>
+                     <span class="hidden-xs">&nbsp; Carrito</span>
+                  </a>
+               </li>
+               <li role="presentation">
+                  <a href="#historial" aria-controls="historial" role="tab" data-toggle="tab">
+                     <span class="glyphicon glyphicon-time"></span>
+                     <span class="hidden-xs">&nbsp; Historial</span>
+                  </a>
+               </li>
+               <li role="presentation">
+                  <a href="#caja" aria-controls="caja" role="tab" data-toggle="tab">
+                     <span class="glyphicon glyphicon-inbox"></span>
+                     <span class="hidden-xs hidden-sm">&nbsp; Caja</span>
+                  </a>
+               </li>
+            </ul>
+            <div class="tab-content">
+               <div role="tabpanel" class="tab-pane active" id="home" style="margin-top: 10px;">
+                  <div class="container-fluid" style="margin-bottom: 10px;">
+                     <div class="row">
+                        <p class="help-block">
+                  <a href="{$fsc->cliente->url()}#nuevo" target="_blank">Nuevo cliente</a>.
+               </p>
+               
+                        <div class="col-sm-12 col-lg-6">
+                           <div class="form-group">
+                              <div class="input-group">
+                                 <span class="input-group-addon">Cliente</span>
+                                 <input class="form-control" type="text" name="ac_cliente" id="ac_cliente" value="{$fsc->cliente_s->nombre}" placeholder="Buscar" autocomplete="off"/>
+                                 <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button" onclick="document.f_tpv.ac_cliente.value=''; document.f_tpv.ac_cliente.focus();">
+                                       <span class="glyphicon glyphicon-edit"></span>
+                                    </button>
+                                 </span>                                 
+                              </div>
+                           </div>
+                        </div>
+
+                        <div class="col-sm-12 col-lg-6">
+                           <div class="form-group">
+                              <div class="input-group">
+                                 <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-barcode" aria-hidden="true"></span>
+                                 </span>
+                                 <input type="text" name="codbar" id="b_codbar" class="form-control" autocomplete="off" placeholder="Escribe el código de barras para añadir"/>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-sm-6 col-lg-6">
+                           <div class="btn-group">
+                              {if="$fsc->tpv_config['tpv_ref_varios']!=''"}
+                              <a href="#" class="btn btn-sm btn-success" onclick="return add_referencia('{$fsc->tpv_config['tpv_ref_varios']}')">
+                                 <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>&nbsp; Línea libre
+                              </a>
+                              {/if}
+                              <a href="#" id="b_buscar_art" class="btn btn-sm btn-info">
+                                 <span class="glyphicon glyphicon-search" aria-hidden="true"></span>&nbsp; Buscar
+                              </a>
+                           </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-6 text-right">
+                           {if="$fsc->comanda"}
+                           <a href="{$fsc->url()}&delete_comanda={$fsc->comanda->idtpv_comanda}" class="btn btn-sm btn-danger">
+                              <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>&nbsp; Eliminar ticket
+                           </a>
+                           {else}
+                           <a href="{$fsc->url()}" class="btn btn-sm btn-danger" onclick="clean_cache_lineas()">
+                              <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>&nbsp; Cancelar venta
+                           </a>
+                           {/if}
+                        </div>
+                     </div>
+                  </div>
+                  <div class="table-responsive">
+                     <table class="table">
+                        <thead>
+                           <tr>
+                              <th class="text-left">Producto</th>
+                              <th class="text-right" width="120">Cantidad</th>
+                              <th class="text-right" width="140">Precio</th>
+                              <th class="text-right" width="160">TOTAL</th>
+                           </tr>
+                        </thead>
+                        <tbody id="tpv_albaran">
+                        {if="$fsc->comanda"}
+                           {loop="$fsc->comanda->get_lineas()"}
+                           <tr id="linea_{$counter+1}" class="warning">
+                              <td>
+                                 <input type="hidden" name="referencia_{$counter+1}" value="{$value->referencia}"/>
+                                 <input type="hidden" id="pvp_{$counter+1}" name="pvp_{$counter+1}" value="{$value->pvpunitario}"/>
+                                 <input type="hidden" id="iva_{$counter+1}" name="iva_{$counter+1}" value="{$value->iva}"/>
+                                 <input type="hidden" id="codimpuesto_{$counter+1}" name="codimpuesto_{$counter+1}" value="{$value->codimpuesto}"/>
+                                 <div class="input-group">
+                                    <span class="input-group-addon">{$value->referencia}</span>
+                                    <input type="text" class="form-control" name="desc_{$counter+1}" value="{$value->descripcion}" onclick="this.select()"/>
+                                 </div>
+                              </td>
+                              <td>
+                                 <div class="input-group">
+                                    <span class="input-group-btn">
+                                       <button class="btn btn-default" type="button" value="-" onclick="linea_sum_ud('{$counter+1}','-1')">-</button>
+                                    </span>
+                                    <input class="form-control text-right" type="text" id="cantidad_{$counter+1}" name="cantidad_{$counter+1}" value="{$value->cantidad}" onkeyup="recalcular()" autocomplete="off"/>
+                                    <span class="input-group-btn">
+                                       <button class="btn btn-default" type="button" value="+" onclick="linea_sum_ud('{$counter+1}','1')">+</button>
+                                    </span>
+                                 </div>
+                              </td>
+                              <td>
+                                 {if="$fsc->tpv_config['tpv_linea_libre']"}
+                                 <div class="input-group">
+                                    <input type="text" id="pvpi_{$counter+1}" name="pvpi_{$counter+1}" value="{$value->pvpunitario*(100+$value->iva)/100}" class="form-control text-right" onkeyup="set_pvpi('{$counter+1}')" onclick="this.select()"/>
+                                    <span class="input-group-btn">
+                                       <button class="btn btn-default" type="button" onclick="get_keyboard('pvpi_{$fsc->numlineas+$counter}','pvpi','{$fsc->numlineas+$counter}')">
+                                          <span class="glyphicon glyphicon-th" aria-hidden="true"></span>
+                                       </button>
+                                    </span>
+                                 </div>
+                                 {else}
+                                 <input type="text" id="pvpi_{$counter+1}" name="pvpi_{$counter+1}" value="{$value->pvpunitario*(100+$value->iva)/100}" class="form-control text-right" readonly=""/>
+                                 {/if}
+                              </td>
+                              <td>
+                                 <div class="input-group">
+                                    <input class="form-control text-right" type="text" id="pvpt_{$counter+1}" name="pvpt_{$counter+1}" disabled="disabled"/>
+                                    <span class="input-group-btn">
+                                       <button class="btn btn-danger" type="button" onclick="$('#linea_{$counter+1}').remove();recalcular();">
+                                          <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                       </button>
+                                    </span>
+                                 </div>
+                              </td>
+                           </tr>
+                           {else}
+                           <tr>
+                              <td colspan="8" class="bg-info">
+                                 Escribe un <b>código de barras</b> o busca el artículo en
+                                 la parte izquierda de la pantalla.
+                              </td>
+                           </tr>
+                           {/loop}
+                        {else}
+                           <tr>
+                              <td colspan="8" class="bg-info">
+                                 Escribe un <b>código de barras</b> o busca el artículo en
+                                 la parte izquierda de la pantalla.
+                              </td>
+                           </tr>
+                        {/if}
+                        </tbody>
+                     </table>
+                  </div>
+                  {if="$fsc->ultentregado!=0"}
+                  <div class="container-fluid">
+                     <div class="row">
+                        <div class="col-md-6 col-sm-12">
+                           <p class="lead">
+                              Última venta: <b>{$fsc->show_precio($fsc->ultentregado)}</b>
+                           </p>
+                        </div>
+                        <div class="col-md-6 col-sm-12 text-right">
+                           <p class="lead">
+                              Último cambio: <b>{$fsc->show_precio($fsc->utlcambio)}</b>
+                           </p>
+                        </div>
+                     </div>
+                  </div>
+                  {/if}
+               </div>
+               <div role="tabpanel" class="tab-pane" id="historial">
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th width="150">Fecha + Hora</th>
+                              <th></th>
+                              <th>Tipo</th>
+                              <th>Cliente</th>
+                              <th class="text-right">Total+{#FS_IVA#}</th>
+                           </tr>
+                        </thead>
+                        {loop="$fsc->historial"}
+                           {if="$value->idfactura"}
+                           <tr class="clickableRow lead" href="#" onclick="return mostrar_factura('{$value->idfactura}');">
+                              <td>{$value->fecha} {$value->hora}</td>
+                              <td class="text-right">
+                                 <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
+                              </td>
+                              <td>Factura</td>
+                              <td>{$value->nombrecliente}</td>
+                              <td class="text-right">{$fsc->show_precio($value->total)}</td>
+                           </tr>
+                           {else}
+                           <tr class="clickableRow lead bg-warning" href="{$fsc->url()}&idtpv_comanda={$value->idtpv_comanda}">
+                              <td>{$value->fecha} {$value->hora}</td>
+                              <td class="text-right">
+                                 <span class="glyphicon glyphicon-hourglass" aria-hidden="true"></span>
+                              </td>
+                              <td>Ticket aparcado</td>
+                              <td>{$value->nombrecliente}</td>
+                              <td class="text-right">{$fsc->show_precio($value->total)}</td>
+                           </tr>
+                           {/if}
+                        {else}
+                        <tr>
+                           <td colspan="5" class="info">Sin resultados.</td>
+                        </tr>
+                        {/loop}
+                     </table>
+                  </div>
+               </div>
+               <div role="tabpanel" class="tab-pane" id="caja">
+                  <br/>
+                  <br/>
+                  <div class="container-fluid">
+                     <div class="row">
+                        <div class="col-sm-6">
+                           <a href="{$fsc->url()}&abrir_caja=TRUE" class="btn btn-lg btn-block btn-info">
+                              <span class="glyphicon glyphicon-inbox"></span>&nbsp; Abrir cajón
+                           </a>
+                        </div>
+                        <div class="col-sm-6 text-right">
+                           <a href="{$fsc->url()}&cerrando=TRUE" class="btn btn-lg btn-block btn-danger">
+                              <span class="glyphicon glyphicon-lock"></span>&nbsp; Cerrar caja
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   
+   <div class="modal" id="modal_guardar" tabindex="-1" role="dialog">
+      <div class="modal-dialog" style="width: 99%; max-width: 700px;">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+               </button>
+               <h4 class="modal-title">Cobrar</h4>
+            </div>
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+               <li role="presentation" class="active">
+                  <a href="#pago" aria-controls="pago" role="tab" data-toggle="tab">
+                     <span class="glyphicon glyphicon-usd"></span>
+                     <span class="hidden-xs">&nbsp; Pago</span>
+                  </a>
+               </li>
+               <li role="presentation">
+                  <a href="#opciones" aria-controls="opciones" role="tab" data-toggle="tab">
+                     <span class="glyphicon glyphicon-cog"></span>
+                     <span class="hidden-xs">&nbsp; Opciones</span>
+                  </a>
+               </li>
+            </ul>
+            <div class="modal-body">
+               <div class="tab-content">
+                  <div role="tabpanel" class="tab-pane active" id="pago">
+                     <div class="container-fluid">
+                        <div class="row">
+                           <div class="col-sm-6">
+                              <div class="form-group">
+                                 <div class="input-group">
+                                    <span class="input-group-addon">Total</span>
+                                    <input type="text" name="tpv_total" id="tpv_total2" class="form-control" disabled="disabled"/>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                              {if="$fsc->comanda"}
+                                 <div class="input-group">
+                                    <span class="input-group-addon">Efectivo</span>
+                                    <input type="text" name="tpv_efectivo" value="{$fsc->comanda->ultentregado}" id="tpv_efectivo" class="form-control" autocomplete="off" onclick="keyboard2_id='tpv_efectivo'"/>
+                                 </div>
+                                 {if="$fsc->comanda->ultentregado!=0"}
+                                 <p class="help-block">El cliente ya ha adelantado <b>{$fsc->show_precio($fsc->comanda->ultentregado)}</b></p>
+                                 {/if}
+                              {else}
+                                                   <div class="form-group">
+                        <a href="{$fsc->forma_pago->url()}">Forma de pago</a>:
+                        <select name="forma_pago" class="form-control">
+                        {loop="$fsc->forma_pago->all()"}
+                           {if="$value->is_default()"}
+                           <option value="{$value->codpago}" selected="">{$value->descripcion} <h1>AVEL</h1></option>
+                           
+                           {else}
+                           <option value="{$value->codpago}">{$value->descripcion}
+                               <h1>AVEL2</h1>
+                               
+                           </option>
+                           
+                           {/if}
+                        {/loop}
+                        </select>
+                     </div>     
+                              
+                              
+                           
+                              <div class="input-group">
+                                    <span class="input-group-addon">Efectivo</span>
+                                    <input type="text" name="tpv_efectivo" id="tpv_efectivo" class="form-control" autocomplete="off" onclick="keyboard2_id='tpv_efectivo'"/>
+                                 </div>
+                             
+                                <!-- <div class="input-group">
+                                    <span class="input-group-addon">Efectivo</span>
+                                    <input type="text" name="tpv_efectivo" id="tpv_efectivo" class="form-control" autocomplete="off" onclick="keyboard2_id='tpv_efectivo'"/>
+                                 </div>-->
+                              {/if}
+                              </div>
+                             <!-- {if="$fsc->tpv_config['tpv_fpago_tarjeta']"}
+                              <div class="form-group">
+                                 <div class="input-group">
+                                    <span class="input-group-addon">Tarjeta</span>
+                                    <input type="text" name="tpv_tarjeta" id="tpv_tarjeta" class="form-control" autocomplete="off"/>
+                                 </div>
+                              </div>
+                              {/if}-->
+                              <div class="form-group">
+                                 <div class="input-group">
+                                    <span class="input-group-addon">Cambio</span>
+                                    <input type="text" name="tpv_cambio" value="0" id="tpv_cambio" class="form-control" disabled="disabled"/>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <label class="checkbox-inline">
+                                    <input type="checkbox" name="regalo" value="TRUE"/>
+                                    Ticket regalo
+                                 </label>
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <a href="#" class="btn btn-sm btn-block btn-default" onclick="set_keyboard2('7')">7</a>
+                              <br/>
+                              <a href="#" class="btn btn-sm btn-block btn-default" onclick="set_keyboard2('4')">4</a>
+                              <br/>
+                              <a href="#" class="btn btn-sm btn-block btn-default" onclick="set_keyboard2('1')">1</a>
+                              <br/>
+                              <a href="#" class="btn btn-sm btn-block btn-default" onclick="set_keyboard2('0')">0</a>
+                              <br/>
+                              <a href="#" class="btn btn-sm btn-block btn-info" onclick="set_keyboard2('-')">-</a>
+                           </div>
+                           <div class="col-sm-2">
+                              <a href="#" class="btn btn-sm btn-block btn-default" onclick="set_keyboard2('8')">8</a>
+                              <br/>
+                              <a href="#" class="btn btn-sm btn-block btn-default" onclick="set_keyboard2('5')">5</a>
+                              <br/>
+                              <a href="#" class="btn btn-sm btn-block btn-default" onclick="set_keyboard2('2')">2</a>
+                              <br/>
+                              <a href="#" class="btn btn-sm btn-block btn-default" onclick="set_keyboard2('.')">.</a>
+                           </div>
+                           <div class="col-sm-2">
+                              <a href="#" class="btn btn-sm btn-block btn-default" onclick="set_keyboard2('9')">9</a>
+                              <br/>
+                              <a href="#" class="btn btn-sm btn-block btn-default" onclick="set_keyboard2('6')">6</a>
+                              <br/>
+                              <a href="#" class="btn btn-sm btn-block btn-default" onclick="set_keyboard2('3')">3</a>
+                              <br/>
+                              <a href="#" class="btn btn-sm btn-block btn-warning" onclick="set_keyboard2('back')">&lt;--</a>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div role="tabpanel" class="tab-pane" id="opciones">
+                     <div class="form-group">
+                        Fecha:
+                        <input class="form-control datepicker" type="text" name="fecha" value="{$fsc->today()}"/>
+                     </div>
+                     <div class="form-group">
+                        <input class="form-control" type="text" name="numero2" placeholder="{#FS_NUMERO2#}" autocomplete="off"/>
+                     </div>
+                     <div class="form-group">
+                        Nº de tickets:
+                        <input class="form-control" type="number" name="num_tickets" value="{$fsc->terminal->num_tickets}"/>
+                     </div>
+                     <div class="form-group">
+                        <textarea class="form-control" name="observaciones" placeholder="Observaciones"></textarea>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="modal-footer">
+               <div class="row">
+                  <div class="col-sm-4 text-left">
+                     <a href="#" class="btn btn-sm btn-danger" data-dismiss="modal" aria-label="Close">
+                        <span class="glyphicon glyphicon-remove"></span>&nbsp; Cancelar
+                     </a>
+                  </div>
+                  <div class="col-sm-4 text-center">
+                     {if="$fsc->tpv_config['tpv_preimprimir']"}
+                     <button class="btn btn-sm btn-info" type="button" onclick="preimprimir_ticket();">
+                        <span class="glyphicon glyphicon-print"></span>&nbsp; Pre-imprimir
+                     </button>
+                     {/if}
+                  </div>
+                  <div class="col-sm-4">
+                     <button class="btn btn-sm btn-primary" type="button" onclick="this.disabled=true;guardar_ticket();">
+                        <span class="glyphicon glyphicon-ok"></span>&nbsp; Cobrar
+                     </button>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</form>
+
+{if="$fsc->movimiento"}
+<form name="f_movimiento" action="{$fsc->url()}&abrir_caja=TRUE" method="post" class="form">
+   <div class="modal" id="modal_movimiento">
+      <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+               <h4 class="modal-title">Nuevo movimiento de caja</h4>
+            </div>
+            <div class="modal-body">
+               <div class="form-group">
+                  Cantidad:
+                  <div class="input-group">
+                     <input type="text" name="cantidad" class="form-control" autocomplete="off"/>
+                     <span class="input-group-addon">{$fsc->simbolo_divisa();}</span>
+                  </div>
+               </div>
+               <div class="radio">
+                  <label>
+                     <input type="radio" name="movimiento" value="entrada"/>
+                     Entrada de dinero
+                  </label>
+               </div>
+               <div class="radio">
+                  <label>
+                     <input type="radio" name="movimiento" value="salida" checked="checked"/>
+                     Salida de dinero
+                  </label>
+               </div>
+               <div class="form-group">
+                  Motivo:
+                  <input type="text" name="descripcion" class="form-control" autocomplete="off"/>
+               </div>
+            </div>
+            <div class="modal-footer">
+               <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled=true;this.form.submit();">
+                  <span class="glyphicon glyphicon-floppy-disk"></span> &nbsp; Guardar
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+</form>
+{/if}
+
+<div class="modal fade" id="modal_factura" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">
+               <span class="glyphicon glyphicon-file"></span>&nbsp; Factura
+            </h4>
+         </div>
+         <div id="div_modal_factura"></div>
+      </div>
+   </div>
+</div>
+
+<div class="modal" id="modal_keyboard" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">
+               <span class="glyphicon glyphicon-th"></span>&nbsp; Teclado
+            </h4>
+         </div>
+         <div class="modal-body">
+            <div class="container-fluid">
+               <div class="row">
+                  <div class="col-sm-12">
+                     <div class="form-group">
+                        <input type="text" id="i_keyboard" class="form-control" autocomplete="off"/>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-default" onclick="set_keyboard('7')">7</a>
+                  </div>
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-default" onclick="set_keyboard('8')">8</a>
+                  </div>
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-default" onclick="set_keyboard('9')">9</a>
+                  </div>
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-warning" onclick="set_keyboard('back')">&lt;--</a>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-12">
+                     <br/>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-default" onclick="set_keyboard('4')">4</a>
+                  </div>
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-default" onclick="set_keyboard('5')">5</a>
+                  </div>
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-default" onclick="set_keyboard('6')">6</a>
+                  </div>
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-danger" onclick="set_keyboard('clear')">
+                        <span class="glyphicon glyphicon-trash"></span>
+                     </a>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-12">
+                     <br/>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-default" onclick="set_keyboard('1')">1</a>
+                  </div>
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-default" onclick="set_keyboard('2')">2</a>
+                  </div>
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-default" onclick="set_keyboard('3')">3</a>
+                  </div>
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-default" onclick="set_keyboard('+/-')">+/-</a>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-12">
+                     <br/>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-default" onclick="set_keyboard('0')">0</a>
+                  </div>
+                  <div class="col-sm-3">
+                     <a href="#" class="btn btn-lg btn-block btn-default" onclick="set_keyboard('.')">.</a>
+                  </div>
+                  <div class="col-sm-6">
+                     <a href="#" class="btn btn-lg btn-block btn-success" onclick="set_keyboard('ok')">
+                        <span class="glyphicon glyphicon-ok"></span>
+                     </a>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="modal" id="modal_articulos">
+   <div class="modal-dialog" style="width: 99%; max-width: 950px;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Buscar artículos</h4>
+         </div>
+         <div class="modal-body">
+            <form id="f_buscar_articulos" name="f_buscar_articulos" action="{$fsc->url()}" method="post" class="form">
+               <input type="hidden" name="codcliente"/>
+               <div class="container-fluid">
+                  <div class="row">
+                     <div class="col-sm-4">
+                        <div class="input-group">
+                           <input class="form-control" type="text" name="query" autocomplete="off"/>
+                           <span class="input-group-btn">
+                              <button class="btn btn-primary" type="submit">
+                                 <span class="glyphicon glyphicon-search"></span>
+                              </button>
+                           </span>
+                        </div>
+                        <label>
+                           <input type="checkbox" name="con_stock" value="TRUE" onchange="buscar_articulos()"/>
+                           sólo con stock
+                        </label>
+                     </div>
+                     <div class="col-sm-4">
+                        <select class="form-control" name="codfamilia" onchange="buscar_articulos()">
+                           <option value="">Cualquier familia</option>
+                           <option value="">------</option>
+                           {loop="$fsc->familias()"}
+                           <option value="{$value->codfamilia}">{$value->nivel}{$value->descripcion}</option>
+                           {/loop}
+                        </select>
+                     </div>
+                     <div class="col-sm-4">
+                        <select class="form-control" name="codfabricante" onchange="buscar_articulos()">
+                           <option value="">Cualquier fabricante</option>
+                           <option value="">------</option>
+                           {loop="$fsc->fabricante->all()"}
+                           <option value="{$value->codfabricante}">{$value->nombre}</option>
+                           {/loop}
+                        </select>
+                     </div>
+                  </div>
+               </div>
+            </form>
+         </div>
+         <div id="search_results"></div>
+      </div>
+   </div>
+</div>
+
+<div class="modal fade" id="modal_combinaciones" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">Selecciona una combinación</h4>
+         </div>
+         <div id="div_combinaciones"></div>
+      </div>
+   </div>
+</div>
+
+<div class="modal fade" id="modal_ayuda_ticket" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">
+               <span class="glyphicon glyphicon-print"></span> Imprimir tickets
+            </h4>
+            <p class="help-block">
+               Para poder imprimir tickets son necesarias varias cosas:
+            </p>
+         </div>
+         <div class="modal-body">
+            <ul>
+               <li>
+                  Una impresora de tickets.
+                  <i>No se imprimen tickets en otro tipo de impresoras.</i>
+               </li>
+               <li>
+                  Ejecutar la aplicación
+                  <a target="_blank" href="https://www.facturascripts.com/descargar?remoteprinter=TRUE">Remote printer</a>.
+               </li>
+            </ul>
+            <a target="_blank" href="https://www.facturascripts.com/descargar?remoteprinter=TRUE" class="thumbnail">
+               <img src="https://i.imgur.com/BFLzvS4.png" alt="remote-printer"/>
+            </a>
+            <p class="help-block">
+               El campo <b>URL de la API de FacturaScripts</b> se refiere a la dirección
+               web donde tengas FacturaScripts. Si en la barra de tu nevagador pone
+               <b>http://localhost/...</b>, entonces debes poner: <b>http://localhost/api.php</b>
+            </p>
+         </div>
+      </div>
+   </div>
+</div>
+
+<form name="f_cambio_agente" action="{$fsc->url()}" method="post" class="form">
+   <div class="modal" id="modal_cambio_agente">
+      <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+               <h4 class="modal-title">Cambiar empleado</h4>
+            </div>
+            <div class="modal-body">
+            {if="$fsc->terminal->cambiar_agente"}
+               <div class="form-group">
+                  <div class="input-group">
+                     <span class="input-group-addon">RFID</span>
+                     <input type="text" name="rfid_agente" class="form-control" autocomplete="off" autofocus=""/>
+                  </div>
+               </div>
+               {loop="$fsc->agente->all()"}
+                  {if="$value->pin"}
+                  <a href="#" class="btn btn-block btn-default" onclick="pedir_pin('{$value->codagente}')">
+                     <span class="glyphicon glyphicon-lock"></span>&nbsp; {$value->get_fullname()}
+                  </a>
+                  {else}
+                  <a href="{$fsc->url()}&cambio_agente={$value->codagente}" class="btn btn-block btn-default">
+                     <span class="glyphicon glyphicon-user"></span>&nbsp; {$value->get_fullname()}
+                  </a>
+                  {/if}
+               {/loop}
+            {else}
+               <div class="alert alert-danger">
+                  Cambio rápido de empleado desactivado. Puedes cambiarlo desde la
+                  <a href="index.php?page=tpv_caja#terminales">configuración del terminal</a>.
+               </div>
+            {/if}
+            </div>
+         </div>
+      </div>
+   </div>
+</form>
+
+<div class="hidden">
+   <img src="http://localhost:10080?terminal={$fsc->terminal->id}" alt="remote-printer"/>
+</div>
+
+{include="footer2"}
