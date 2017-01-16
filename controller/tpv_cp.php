@@ -63,7 +63,7 @@ class tpv_cp extends fs_controller
    
    protected function private_core()
    {
-    $this->share_extensions();
+  /*  $this->share_extensions();
       
       /// ¿El usuario tiene permiso para eliminar en esta página?
       $this->allow_delete = $this->user->allow_delete_on(__CLASS__);
@@ -100,7 +100,7 @@ class tpv_cp extends fs_controller
           'tpv_preimprimir' => FALSE
       );
       
-      /*
+      
       
       
       $this->tpv_config = $fsvar->array_get($this->tpv_config, FALSE);

@@ -26,6 +26,51 @@ require_once 'plugins/facturacion_base/model/core/factura_cliente.php';
  */
 class factura_cliente extends FacturaScripts\model\factura_cliente
 {
+
+    public $rent_iva_por;
+    public $rent_fuente_por;
+    public $rent_iva;
+    public $rent_fuente;
+
+    public function __construct($a = FALSE){
+
+        parent::__construct($a);
+        if($a)
+        {
+            $this->rent_iva_por = $a['rent_iva_por'];
+            $this->rent_fuente_por = $a['rent_fuente_por'];
+            $this->rent_iva = $a['rent_iva'];
+            $this->rent_fuente = $a['rent_fuente'];
+        }
+        else
+        {
+            $this->rent_iva_por = NULL;
+            $this->rent_fuente_por = NULL;
+            $this->rent_iva = NULL;
+            $this->rent_fuente = NULL;
+        }
+
+}
+
+
+    public function save()
+    {
+        if( parent::save() )
+        {
+            $sql = "UPDATE ".$this->table_name." SET rent_iva_por = ".$this->var2str($this->rent_iva_por)
+                .", rent_fuente_por = ".$this->var2str($this->rent_fuente_por)
+                .", rent_iva = ".$this->var2str($this->rent_iva)
+                .", rent_fuente = ".$this->var2str($this->rent_fuente)
+                ."  WHERE idfactura = ".$this->var2str($this->idfactura).";";
+
+            return $this->db->exec($sql);
+        }
+        else
+        {
+            return FALSE;
+        }
+    }
+
    
     public function new_codigo() 
 	{

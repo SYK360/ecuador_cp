@@ -1,0 +1,33 @@
+{include="header2"}
+
+{if="$fsc->factura"}
+
+<form action="{$fsc->url()}" method="post" class="form">
+    <div class="col-sm-2">
+        <div class="form-group">
+            <span class='text-capitalize'>RENT IVA %:</span>
+            <input class="form-control" id = "renti_iva_por" type="number" name="rent_iva_por" value="{$fsc->factura->rent_iva_por}"/>
+
+            <span class='text-capitalize' id="un_span">Valor Retenido: {$fsc->factura->rent_iva}</span>
+        </div>
+    </div>
+    <div class="col-sm-2">
+        <div class="form-group">
+            <span class='text-capitalize'>RENT FUENTE %:</span>
+            <input class="form-control" id= "rentf_fuente_por"  type="number" name="rent_fuente_por" value="{$fsc->factura->rent_fuente_por}" />
+
+            <span class='text-capitalize' id="un_span2">Valor Retenido: {$fsc->factura->rent_fuente}</span>
+        </div>
+    </div>
+
+<div class="col-sm-7">
+    <br/>
+    <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled=true;this.form.submit();">
+        <span class="glyphicon glyphicon-floppy-disk"></span>&nbsp; Guardar
+    </button>
+</div>
+</form>
+{/if}
+
+
+{include="footer2"}
