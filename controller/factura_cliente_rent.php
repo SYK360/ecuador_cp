@@ -165,7 +165,7 @@ class factura_cliente_rent extends  fs_controller
 
     }
 
-    private function share_extensions()
+ /*   private function share_extensions()
     {
         $fsext = new fs_extension();
         $fsext->name = 'tab_collapse_factura_cliente_rent';
@@ -173,10 +173,30 @@ class factura_cliente_rent extends  fs_controller
         $fsext->to = 'ventas_factura';
         $fsext->type = 'tab';
         $fsext->text = '<span class="glyphicon glyphicon-paste"></span> &nbsp; Retención';
+          $fsext->save();
+
+
+    }*/
+
+    private function share_extensions()
+    {
+        $extension = array(
+            'name' => 'tab_collapse_factura_cliente_rent',
+            'page_from' => __CLASS__,
+            'page_to' => 'ventas_factura',
+            'type' => 'tab',
+            'text' => '<span class="glyphicon glyphicon-paste"></span> &nbsp; Retención',
+            'params' => ''
+        );
+
+        $fsext = new fs_extension($extension);
         $fsext->save();
 
 
+
     }
+
+
 
     public function url()
     {
