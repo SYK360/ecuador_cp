@@ -8,12 +8,13 @@
  */
 
 require_model('factura_cliente.php');
-
+require_model('cliente.php');
 class print_guias  extends fs_controller
 {
 
     public $direccion;
 public $dic_id;
+public $cliente;
 
     public function __construct()
     {
@@ -38,6 +39,9 @@ public $dic_id;
 
         $this->direccion = new factura_cliente();
         $this-> dic_id = $this->direccion->get($_GET['id']);
+        
+        $cliente = new cliente();
+        $this->cliente = $cliente->get($this->dic_id->codcliente);
 
 
     }

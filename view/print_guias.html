@@ -2,15 +2,27 @@
 
 {if="$fsc->direccion"}
 
+
+
 <div class="jumbotron" >
     <div class="container">
-        <h1 style = "color:#10427b;"><strong>Nombre:</strong> {$fsc->dic_id->envio_nombre} {$fsc->dic_id->envio_apellidos}</h1>
+        <h1 style = "color:#10427b;"><strong>Nombre:</strong> {$fsc->dic_id->nombrecliente} {$fsc->dic_id->envio_apellidos}</h1>
         <h2><strong>CI:</strong> {$fsc->dic_id->cifnif}</h2>
-        <h3><strong>Teléfono:</strong> {$fsc->dic_id->envio_apartado} </h3>
+        <h3><strong>Teléfono:</strong> {$fsc->cliente->telefono1} </h3>
         <p><strong>Dirección:</strong> {$fsc->dic_id->envio_direccion} </p>
         <p><strong>Ciudad:</strong> {$fsc->dic_id->envio_ciudad} <strong>Provincia:</strong> {$fsc->dic_id->envio_provincia} Medio: Servientrega </p>
+        <input style="width:700px; " placeholder="¿Que contiene el pack?"> </input>
+        
+       <!--<button  class="btn btn-sm btn-primary">
+                     <span class="glyphicon glyphicon-floppy-disk"></span>&nbsp; Guía SV
+                  </button>
+<button  class="btn btn-sm btn-primary">
+                     <span class="glyphicon glyphicon-floppy-disk"></span>&nbsp; Guía Label 
+                  </button> -->
     </div>
 </div>
+
+
 
 
 {else}
