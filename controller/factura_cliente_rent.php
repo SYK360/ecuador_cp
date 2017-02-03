@@ -128,7 +128,7 @@ class factura_cliente_rent extends  fs_controller
                     $articulo->sum_stock($this->factura->codalmacen, $linea->cantidad);
 
 
-                    $linea->cantidad = 0;
+                    //$linea->cantidad = 0;
                     $linea->pvpsindto = 0.00;
                     $linea->pvpunitario = 0.00;
                     $linea->pvptotal = 0.00;
