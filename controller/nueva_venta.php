@@ -738,23 +738,10 @@ class nueva_venta extends fs_controller
                   
                   if( $linea->save() )
                   {
-                   if(  $_POST['cantidad_'.$i ] == 0  )
+                     if( $articulo AND isset($_POST['stock']) )
                      {
-                     	   $this->new_error_msg("La cantidad de un producto no puede ser 0");
-                         $continuar = FALSE;
-                         
-                     }   elseif ($articulo->stockfis >= $_POST['cantidad_'.$i]){
-                         
-                          /// descontamos del stock
-                        $articulo->sum_stock($factura->codalmacen, 0 - $linea->cantidad);                        
-                        
-                     } elseif ($articulo->controlstock == TRUE && $articulo->nostock == TRUE) {
-                         
-                         $this->new_message("Servicio Generado Correctamente");
-                     
-                 }else {
-                         $this->new_error_msg("Stock insuficiente");
-                         $continuar = FALSE;
+                        /// descontamos del stock
+                        $articulo->sum_stock($albaran->codalmacen, 0 - $linea->cantidad);
                      }
                      
                      $albaran->neto += $linea->pvptotal;
@@ -992,7 +979,7 @@ class nueva_venta extends fs_controller
                   
                   if( $linea->save() )
                   {
-                      if(  $_POST['cantidad_'.$i ] == 0  )
+                     if(  $_POST['cantidad_'.$i ] == 0  )
                      {
                            $this->new_error_msg("La cantidad de un producto no puede ser 0");
                          $continuar = FALSE;
@@ -1010,6 +997,7 @@ class nueva_venta extends fs_controller
                          $this->new_error_msg("Stock insuficiente");
                          $continuar = FALSE;
                      }
+                     
                      $factura->neto += $linea->pvptotal;
                      $factura->totaliva += ($linea->pvptotal * $linea->iva/100);
                      $factura->totalirpf += ($linea->pvptotal * $linea->irpf/100);
