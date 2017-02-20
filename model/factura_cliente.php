@@ -20,10 +20,12 @@
 require_once 'plugins/facturacion_base/model/core/factura_cliente.php';
 
 /**
- * Factura de un cliente.
- * 
- * @author Carlos García Gómez <neorazorx@gmail.com>
+ * Created by PhpStorm.
+ * User: SYK
+ * Date: 19/02/2017
+ * Time: 22:03
  */
+
 class factura_cliente extends FacturaScripts\model\factura_cliente
 {
 
@@ -31,6 +33,10 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
     public $rent_fuente_por;
     public $rent_iva;
     public $rent_fuente;
+    public $no_doc;
+    public $no_aut;
+    public $no_serie;
+
 
     public function __construct($a = FALSE){
 
@@ -41,6 +47,9 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
             $this->rent_fuente_por = $a['rent_fuente_por'];
             $this->rent_iva = $a['rent_iva'];
             $this->rent_fuente = $a['rent_fuente'];
+            $this->no_doc = $a['no_doc'];
+            $this->no_aut = $a['no_aut'];
+            $this->no_serie = $a['no_serie'];
         }
         else
         {
@@ -48,6 +57,9 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
             $this->rent_fuente_por = NULL;
             $this->rent_iva = NULL;
             $this->rent_fuente = NULL;
+            $this->no_doc = NULL;
+            $this->no_aut = NULL;
+            $this->no_serie = NULL;
         }
 
 }

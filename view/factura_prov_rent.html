@@ -3,7 +3,6 @@
 {if="$fsc->factura"}
 
 <form action="{$fsc->url()}" method="post" class="form">
-    <div class="row">
     <div class="col-sm-2">
         <div class="form-group">
             <span class='text-capitalize'>RENT IVA %:</span>
@@ -21,37 +20,12 @@
         </div>
     </div>
 
-
-
-
-
-    <div class="col-sm-2">
-     <spn> NO. DE DOCUMENTO</spn>
-      <input class="form-control" id= "no_doc"  type="text" name="no_doc" value="{}" />
-
+    <div class="col-sm-7">
+        <br/>
+        <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled=true;this.form.submit();">
+            <span class="glyphicon glyphicon-floppy-disk"></span>&nbsp; Guardar
+        </button>
     </div>
-        <div class="col-sm-2">
-            <spn> NO. DE AUTORIZACION</spn>
-            <input class="form-control" id= "no_aut"  type="text" name="no_aut" value="{}" />
-
-        </div>
-        <div class="col-sm-2">
-            <spn> NO. DE SERIE</spn>
-            <input class="form-control" id= "no_serie"  type="text" name="no_serie" value="{}" />
-
-        </div>
-
- </div>
-
-   <div class="row">
-
-        <div class="col-sm-6 col-sm-offset-6">
-            <br/>
-            <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled=true;this.form.submit();">
-                <span class="glyphicon glyphicon-floppy-disk"></span>&nbsp; Guardar
-            </button>
-        </div>
-   </div>
 </form>
 {/if}
 
