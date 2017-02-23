@@ -49,6 +49,8 @@ public $cliente;
 
     private function share_extensions()
     {
+
+
         $extension = array(
             'name' => 'modal_print_guias',
             'page_from' => __CLASS__,

@@ -48,7 +48,9 @@ class factura_cliente_rent extends  fs_controller
                 $this->calcular_rent();
                 $this->factura->rent_iva_por = $_POST['rent_iva_por'];
                 $this->factura->rent_fuente_por = $_POST['rent_fuente_por'];
-
+                $this->factura->no_doc = $_POST['no_doc'];
+                $this->factura->no_serie = $_POST['no_serie'];
+                $this->factura->no_aut = $_POST['no_aut'];
 
 
                 if( $this->factura->save() )
@@ -86,6 +88,7 @@ class factura_cliente_rent extends  fs_controller
         $this->factura->totaleuros = 0.00;
         $this->factura->neto =  0.00 ;
         $this->factura->total =  0.00 ;
+       // $this->factura->fecha = date();
         $this->factura->save();
 
 

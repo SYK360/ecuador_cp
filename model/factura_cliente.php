@@ -73,6 +73,9 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
                 .", rent_fuente_por = ".$this->var2str($this->rent_fuente_por)
                 .", rent_iva = ".$this->var2str($this->rent_iva)
                 .", rent_fuente = ".$this->var2str($this->rent_fuente)
+                .", no_doc = ".$this->var2str($this->no_doc)
+                .", no_aut = ".$this->var2str($this->no_aut)
+                .", no_serie = ".$this->var2str($this->no_serie)
                 ."  WHERE idfactura = ".$this->var2str($this->idfactura).";";
 
             return $this->db->exec($sql);

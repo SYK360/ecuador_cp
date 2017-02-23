@@ -179,6 +179,21 @@
         <nulo>YES</nulo>
     </columna>
     <columna>
+        <nombre>no_aut</nombre>
+        <tipo>character varying(50)</tipo>
+        <nulo>YES</nulo>
+    </columna>
+    <columna>
+        <nombre>no_serie</nombre>
+        <tipo>character varying(50)</tipo>
+        <nulo>YES</nulo>
+    </columna>
+    <columna>
+        <nombre>no_doc</nombre>
+        <tipo>character varying(50)</tipo>
+        <nulo>YES</nulo>
+    </columna>
+    <columna>
         <nombre>rent_iva_por</nombre>
         <tipo>character varying(50)</tipo>
         <nulo>YES</nulo>
