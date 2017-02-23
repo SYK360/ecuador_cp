@@ -706,7 +706,7 @@ class ventas_articulo extends fs_controller
          if( $this->db->table_exists('facturascli', $tablas) AND $this->db->table_exists('lineasfacturascli', $tablas) )
       {
          /// buscamos el artículo en facturas de venta_anuladas adaptacion ecuador_Cp
-         $sql = "SELECT f.idfactura,f.codigo,l.cantidad,f.fecha,f.hora,f.codalmacen
+         $sql = "SELECT f.idfactura,f.codigo,l.cantidad,f.fecha_anulada,f.hora_anulada,f.codalmacen
             FROM facturascli f, lineasfacturascli l
             WHERE f.idfactura = l.idfactura AND l.idalbaran IS NULL 
             AND f.anulada = 1
@@ -724,8 +724,8 @@ class ventas_articulo extends fs_controller
                    'inicial' => 0,
                    'movimiento' => floatval($d['cantidad']),
                    'final' => 0,
-                   'fecha' => date('d-m-Y', strtotime($d['fecha'])),
-                   'hora' => date('H:i:s', strtotime($d['hora']))
+                   'fecha' => date('d-m-Y', strtotime($d['fecha_anulada'])),
+                   'hora' => date('H:i:s', strtotime($d['hora_anulada']))
                );
             }
          }

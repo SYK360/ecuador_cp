@@ -105,6 +105,26 @@
         <nulo>NO</nulo>
     </columna>
     <columna>
+        <nombre>fecha_anulada</nombre>
+        <tipo>date</tipo>
+        <nulo>YES</nulo>
+    </columna>
+    <columna>
+        <nombre>fecha_it_air</nombre>
+        <tipo>date</tipo>
+        <nulo>YES</nulo>
+    </columna>
+    <columna>
+        <nombre>fecha_tt_air</nombre>
+        <tipo>date</tipo>
+        <nulo>YES</nulo>
+    </columna>
+    <columna>
+        <nombre>fecha_emi_air</nombre>
+        <tipo>date</tipo>
+        <nulo>YES</nulo>
+    </columna>
+    <columna>
         <nombre>vencimiento</nombre>
         <tipo>date</tipo>
     </columna>
@@ -117,6 +137,25 @@
         <tipo>time without time zone</tipo>
         <nulo>NO</nulo>
         <defecto>now()</defecto>
+    </columna>
+    <columna>
+        <nombre>hora_anulada</nombre>
+        <tipo>time without time zone</tipo>
+        <nulo>YES</nulo>
+
+    </columna>
+    <columna>
+        <nombre>hora_sa_air</nombre>
+        <tipo>time without time zone</tipo>
+        <nulo>YES</nulo>
+
+    </columna>
+
+    <columna>
+        <nombre>hora_lle_air</nombre>
+        <tipo>time without time zone</tipo>
+        <nulo>YES</nulo>
+
     </columna>
     <columna>
         <nombre>idasiento</nombre>
@@ -315,6 +354,16 @@
     <columna>
         <nombre>apartadoenv</nombre>
         <tipo>character varying(10)</tipo>
+        <nulo>YES</nulo>
+    </columna>
+    <columna>
+        <nombre>motivo_tr_air</nombre>
+        <tipo>character varying(500)</tipo>
+        <nulo>YES</nulo>
+    </columna>
+    <columna>
+        <nombre>placa_ve_air</nombre>
+        <tipo>character varying(30)</tipo>
         <nulo>YES</nulo>
     </columna>
     <columna>

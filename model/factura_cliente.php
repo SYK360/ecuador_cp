@@ -36,6 +36,15 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
     public $no_doc;
     public $no_aut;
     public $no_serie;
+    public $fecha_anulada;
+    public $hora_anulada;
+    public $fecha_it_air;
+    public $fecha_tt_air;
+    public $hora_sa_air;
+    public $hora_lle_air;
+    public $fecha_emi_air;
+    public $motivo_tr_air;
+    public $placa_ve_air;
 
 
     public function __construct($a = FALSE){
@@ -50,6 +59,15 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
             $this->no_doc = $a['no_doc'];
             $this->no_aut = $a['no_aut'];
             $this->no_serie = $a['no_serie'];
+            $this->fecha_anulada = $a['fecha_anulada'];
+            $this->hora_anulada = $a['hora_anulada'];
+            $this->fecha_it_air = $a['fecha_it_air'];
+            $this->fecha_tt_air = $a['fecha_tt_air'];
+            $this->hora_sa_air = $a['hora_sa_air'];
+            $this->hora_lle_air = $a['hora_lle_air'];
+            $this->fecha_emi_air = $a['fecha_emi_air'];
+            $this->motivo_tr_air = $a['motivo_tr_air'];
+            $this->placa_ve_air = $a['placa_ve_air'];
         }
         else
         {
@@ -60,6 +78,17 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
             $this->no_doc = NULL;
             $this->no_aut = NULL;
             $this->no_serie = NULL;
+            $this->fecha_anulada = NULL;
+            $this->hora_anulada = NULL;
+            $this->fecha_anulada = NULL;
+            $this->hora_anulada =  NULL;
+            $this->fecha_it_air = NULL;
+            $this->fecha_tt_air = NULL;
+            $this->hora_sa_air = NULL;
+            $this->hora_lle_air = NULL;
+            $this->fecha_emi_air = NULL;
+            $this->motivo_tr_air = NULL;
+            $this->placa_ve_air = NULL;
         }
 
 }
@@ -76,6 +105,15 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
                 .", no_doc = ".$this->var2str($this->no_doc)
                 .", no_aut = ".$this->var2str($this->no_aut)
                 .", no_serie = ".$this->var2str($this->no_serie)
+                .", fecha_anulada = ".$this->var2str($this->fecha_anulada)
+                .", hora_anulada = ".$this->var2str($this->hora_anulada)
+                .", fecha_it_air = ".$this->var2str($this->fecha_it_air)
+                .", fecha_tt_air = ".$this->var2str($this->fecha_tt_air)
+                .", hora_sa_air = ".$this->var2str($this->hora_sa_air)
+                .", hora_lle_air = ".$this->var2str($this->hora_lle_air)
+                .", fecha_emi_air = ".$this->var2str($this->fecha_emi_air)
+                .", motivo_tr_air = ".$this->var2str($this->motivo_tr_air)
+                .", placa_ve_air = ".$this->var2str($this->placa_ve_air)
                 ."  WHERE idfactura = ".$this->var2str($this->idfactura).";";
 
             return $this->db->exec($sql);

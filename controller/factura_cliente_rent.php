@@ -88,7 +88,8 @@ class factura_cliente_rent extends  fs_controller
         $this->factura->totaleuros = 0.00;
         $this->factura->neto =  0.00 ;
         $this->factura->total =  0.00 ;
-       // $this->factura->fecha = date();
+        $this->factura->fecha_anulada = $this->today();
+        $this->factura->hora_anulada = $this->hour();
         $this->factura->save();
 
 
