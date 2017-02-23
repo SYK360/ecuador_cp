@@ -871,7 +871,7 @@ class informe_articulos extends fs_controller
       }
 
          /// buscamos el artículo en facturas de venta_anuldas adaptacion ecuador_cp
-      $sql = "SELECT f.codigo,l.cantidad,l.pvpunitario,l.dtopor,f.fecha,f.hora"
+      $sql = "SELECT f.codigo,l.cantidad,l.pvpunitario,l.dtopor,f.fecha_anulada,f.hora_anulada"
               .",f.codalmacen,f.idfactura,f.codcliente,f.nombrecliente"
               ." FROM facturascli f, lineasfacturascli l"
               ." WHERE f.idfactura = l.idfactura AND l.idalbaran IS NULL AND f.anulada = 1"
@@ -892,8 +892,8 @@ class informe_articulos extends fs_controller
                 'precio' => floatval($d['pvpunitario']),
                 'dto' => floatval($d['dtopor']),
                 'final' => 0,
-                'fecha' => date('d-m-Y', strtotime($d['fecha'])),
-                'hora' => $d['hora']
+                'fecha' => date('d-m-Y', strtotime($d['fecha_anulada'])),
+                'hora' => $d['hora_anulada']
             );
          }
       }
