@@ -2,7 +2,7 @@
 
 /*
  * This file is part of FacturaSctipts
- * Copyright (C) 2015  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2015-2017  Carlos Garcia Gomez  neorazorx@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -53,6 +53,10 @@ class admin_ecuador extends fs_controller
             }
          }
       }
+      else
+      {
+         $this->check_ejercicio();
+      }
    }
    
    private function share_extensions()
@@ -65,5 +69,25 @@ class admin_ecuador extends fs_controller
       $fsext->text = 'Plan contable de Ecuador';
       $fsext->params = 'plugins/ecuador/extras/ecuador.xml';
       $fsext->save();
+   }
+   
+   private function check_ejercicio()
+   {
+      $ej0 = new ejercicio();
+      foreach($ej0->all_abiertos() as $ejercicio)
+      {
+         if($ejercicio->longsubcuenta != 6)
+         {
+            $ejercicio->longsubcuenta = 6;
+            if( $ejercicio->save() )
+            {
+               $this->new_message('Datos del ejercicio '.$ejercicio->codejercicio.' modificados correctamente.');
+            }
+            else
+            {
+               $this->new_error_msg('Error al modificar el ejercicio.');
+            }
+         }
+      }
    }
 }
