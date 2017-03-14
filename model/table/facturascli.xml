@@ -303,6 +303,11 @@
         <tipo>double precision</tipo>
         <nulo>NO</nulo>
     </columna>
+        <columna>
+        <nombre>dtototal</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+    </columna>
     <columna>
         <nombre>totaliva</nombre>
         <tipo>double precision</tipo>

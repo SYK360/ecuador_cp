@@ -45,7 +45,7 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
     public $fecha_emi_air;
     public $motivo_tr_air;
     public $placa_ve_air;
-
+    public $dtototal;
 
     public function __construct($a = FALSE){
 
@@ -68,6 +68,7 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
             $this->fecha_emi_air = $a['fecha_emi_air'];
             $this->motivo_tr_air = $a['motivo_tr_air'];
             $this->placa_ve_air = $a['placa_ve_air'];
+            $this->dtototal = $a['dtototal'];
         }
         else
         {
@@ -89,10 +90,172 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
             $this->fecha_emi_air = NULL;
             $this->motivo_tr_air = NULL;
             $this->placa_ve_air = NULL;
+            $this->dtototal = 0;
         }
 
 }
 
+
+   public function get_lineas_iva()
+   {
+      $linea_iva = new \linea_iva_factura_cliente();
+      $lineasi = $linea_iva->all_from_factura($this->idfactura);
+      /// si no hay lineas de IVA las generamos
+      if( !$lineasi )
+      {
+         $lineas = $this->get_lineas();
+         if($lineas)
+         {
+            foreach($lineas as $l)
+            {
+               $i = 0;
+               $encontrada = FALSE;
+               while($i < count($lineasi))
+               {
+                  if($l->iva == $lineasi[$i]->iva AND $l->recargo == $lineasi[$i]->recargo)
+                  {
+                     $encontrada = TRUE;
+                     $lineasi[$i]->neto += $l->pvptotal;
+                     //TRABAJANDO..
+                     $lineasi[$i]->dtototal += $l->dtolineal;
+                     $lineasi[$i]->totaliva += ($l->pvptotal*$l->iva)/100;
+                     $lineasi[$i]->totalrecargo += ($l->pvptotal*$l->recargo)/100;
+                  }
+                  $i++;
+               }
+               if( !$encontrada )
+               {
+                  $lineasi[$i] = new \linea_iva_factura_cliente();
+                  $lineasi[$i]->idfactura = $this->idfactura;
+                  $lineasi[$i]->codimpuesto = $l->codimpuesto;
+                  $lineasi[$i]->iva = $l->iva;
+                  $lineasi[$i]->recargo = $l->recargo;
+                  $lineasi[$i]->neto = $l->pvptotal;
+                  $lineasi[$i]->dtototal = $l->dtolineal;
+                  $lineasi[$i]->totaliva = ($l->pvptotal*$l->iva)/100;
+                  $lineasi[$i]->totalrecargo = ($l->pvptotal*$l->recargo)/100;
+               }
+            }
+
+            /// redondeamos y guardamos
+            if( count($lineasi) == 1 )
+            {
+               $lineasi[0]->neto = round($lineasi[0]->neto, FS_NF0);
+               $lineasi[0]->dtototal = round($lineasi[0]->dtototal, FS_NF0);
+               $lineasi[0]->totaliva = round($lineasi[0]->totaliva, FS_NF0);
+               $lineasi[0]->totaliva = round($lineasi[0]->totaliva, FS_NF0);
+               $lineasi[0]->totallinea = $lineasi[0]->neto + $lineasi[0]->totaliva + $lineasi[0]->totalrecargo;
+               $lineasi[0]->save();
+            }
+            else
+            {
+               /*
+                * Como el neto y el iva se redondean en la factura, al dividirlo
+                * en líneas de iva podemos encontrarnos con un descuadre que
+                * hay que calcular y solucionar.
+                */
+               $t_neto = 0;
+               $t_iva = 0;
+               foreach($lineasi as $li)
+               {
+                  $li->neto = bround($li->neto, FS_NF0);
+                  $li->totaliva = bround($li->totaliva, FS_NF0);
+                  $li->totallinea = $li->neto + $li->totaliva;
+
+                  $t_neto += $li->neto;
+                  $t_iva += $li->totaliva;
+               }
+
+               if( !$this->floatcmp($this->neto, $t_neto) )
+               {
+                  /*
+                   * Sumamos o restamos un céntimo a los netos más altos
+                   * hasta que desaparezca el descuadre
+                   */
+                  $diferencia = round( ($this->neto-$t_neto) * 100 );
+                  usort($lineasi, function($a, $b) {
+                     if($a->totallinea == $b->totallinea)
+                     {
+                        return 0;
+                     }
+                     else if($this->total < 0)
+                     {
+                        return ($a->totallinea < $b->totallinea) ? -1 : 1;
+                     }
+                     else
+                     {
+                        return ($a->totallinea < $b->totallinea) ? 1 : -1;
+                     }
+                  });
+
+                  foreach($lineasi as $i => $value)
+                  {
+                     if($diferencia > 0)
+                     {
+                        $lineasi[$i]->neto += .01;
+                        $diferencia--;
+                     }
+                     else if($diferencia < 0)
+                     {
+                        $lineasi[$i]->neto -= .01;
+                        $diferencia++;
+                     }
+                     else
+                        break;
+                  }
+               }
+
+               if( !$this->floatcmp($this->totaliva, $t_iva) )
+               {
+                  /*
+                   * Sumamos o restamos un céntimo a los importes más altos
+                   * hasta que desaparezca el descuadre
+                   */
+                  $diferencia = round( ($this->totaliva-$t_iva) * 100 );
+                  usort($lineasi, function($a, $b) {
+                     if($a->totaliva == $b->totaliva)
+                     {
+                        return 0;
+                     }
+                     else if($this->total < 0)
+                     {
+                        return ($a->totaliva < $b->totaliva) ? -1 : 1;
+                     }
+                     else
+                     {
+                        return ($a->totaliva < $b->totaliva) ? 1 : -1;
+                     }
+                  });
+
+                  foreach($lineasi as $i => $value)
+                  {
+                     if($diferencia > 0)
+                     {
+                        $lineasi[$i]->totaliva += .01;
+                        $diferencia--;
+                     }
+                     else if($diferencia < 0)
+                     {
+                        $lineasi[$i]->totaliva -= .01;
+                        $diferencia++;
+                     }
+                     else
+                        break;
+                  }
+               }
+
+               foreach($lineasi as $i => $value)
+               {
+                  $lineasi[$i]->totallinea = $value->neto + $value->totaliva + $value->totalrecargo;
+                  $lineasi[$i]->save();
+               }
+            }
+         }
+      }
+      return $lineasi;
+   }
+
+   
 
     public function save()
     {
@@ -114,6 +277,7 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
                 .", fecha_emi_air = ".$this->var2str($this->fecha_emi_air)
                 .", motivo_tr_air = ".$this->var2str($this->motivo_tr_air)
                 .", placa_ve_air = ".$this->var2str($this->placa_ve_air)
+                .", dtototal = ".$this->var2str($this->dtototal)                    
                 ."  WHERE idfactura = ".$this->var2str($this->idfactura).";";
 
             return $this->db->exec($sql);
