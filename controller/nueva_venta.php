@@ -958,8 +958,10 @@ class nueva_venta extends fs_controller
                      $imp0 = $this->impuesto->get_by_iva($_POST['iva_'.$i]);
                      if($imp0)
                      {
+
                         $linea->codimpuesto = $imp0->codimpuesto;
                         $linea->iva = floatval($_POST['iva_'.$i]);
+
                         $linea->recargo = floatval($_POST['recargo_'.$i]);
                      }
                      else
@@ -975,9 +977,15 @@ class nueva_venta extends fs_controller
                   $linea->dtopor = floatval($_POST['dto_'.$i]);
                   $linea->pvpsindto = ($linea->pvpunitario * $linea->cantidad);
                   //TRABAJANDO..
-                  $linea->dtolineal = floatval($linea->pvpsindto * ( $linea->dtopor / 100 ));
-                  $linea->pvptotal = floatval($_POST['neto_'.$i]);
+                  $linea->dtolineal = floatval($linea->pvpsindto * ( $linea->dtopor / 100));
+                  //WORKING..
+                  if ($linea->iva == 0) {
+                     $linea->ivalineal = $linea->pvpsindto - $linea->dtolineal;
+                  }else{
+                    $linea->ivalineal = 0;
+                  }
 
+                  $linea->pvptotal = floatval($_POST['neto_'.$i]);
                   $articulo = $art0->get($_POST['referencia_'.$i]);
                   if($articulo)
                   {
@@ -1003,9 +1011,11 @@ class nueva_venta extends fs_controller
                            $articulo->sum_stock($factura->codalmacen, 0 - $linea->cantidad);
                         }
                      }
-//TRABAJANDO...
+                      //TRABAJANDO...
                      $factura->neto += $linea->pvptotal;
                      $factura->dtototal += $linea->dtolineal;
+                     //WORKING..
+                     $factura->iva0 += $linea->ivalineal;
                      $factura->totaliva += ($linea->pvptotal * $linea->iva/100);
                      $factura->totalirpf += ($linea->pvptotal * $linea->irpf/100);
                      $factura->totalrecargo += ($linea->pvptotal * $linea->recargo/100);

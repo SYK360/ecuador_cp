@@ -466,8 +466,10 @@ class ventas_factura extends fs_controller
          $factura->totalirpf = 0 - $factura->totalirpf;
          $factura->totaliva = 0 - $factura->totaliv;
          $factura->totalrecargo = 0 - $factura->totalrecargo;
-         //TRABAJANDO..
+         //TRABAJANDO...
          $factura->dtototal = 0 - $factura->dtototal;
+         //WORKING...
+         $factura->iva0 = $factura->iva0;
          $factura->total = $factura->neto + $factura->totaliva + $factura->totalrecargo - $factura->totalirpf;
 
          if( $factura->save() )
@@ -483,8 +485,6 @@ class ventas_factura extends fs_controller
                $lin->idfactura = $factura->idfactura;
                $lin->cantidad = 0 - $lin->cantidad;
                $lin->pvpsindto = $lin->pvpunitario * $lin->cantidad;
-               //TRABAJANDO...
-
                $lin->pvptotal = $lin->pvpunitario * (100 - $lin->dtopor)/100 * $lin->cantidad;
 
                if( $lin->save() )
