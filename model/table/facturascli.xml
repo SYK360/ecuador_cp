@@ -25,7 +25,7 @@
         <nulo>YES</nulo>
     </columna>
     <columna>
-        <nombre>codagente</nombre>
+        <nombre>cotagente</nombre>
         <tipo>character varying(10)</tipo>
         <nulo>YES</nulo>
     </columna>
@@ -305,6 +305,11 @@
     </columna>
         <columna>
         <nombre>dtototal</nombre>
+        <tipo>double precision</tipo>
+        <nulo>YES</nulo>
+    </columna>
+    <columna>
+        <nombre>iva0</nombre>
         <tipo>double precision</tipo>
         <nulo>YES</nulo>
     </columna>
