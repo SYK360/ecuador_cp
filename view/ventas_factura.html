@@ -137,7 +137,7 @@
                {if="$fsc->allow_delete"}
                <a id="b_eliminar" class="btn btn-sm btn-danger" href="#">
                   <span class="glyphicon glyphicon-trash"></span>
-                  <span class="hidden-sm hidden-xs">&nbsp;Eliminar</span>
+                  <span class="hidden-sm hidden-xs">&nbsp;Anular</span>
                </a>
                {/if}
                <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled=true;this.form.submit();">
@@ -326,9 +326,9 @@
                      <td class="text-right">{$fsc->show_precio($value->pvpunitario, $fsc->factura->coddivisa, TRUE, FS_NF0_ART)}</td>
                      <td class="text-right">{$fsc->show_numero($value->dtopor, 2)} %</td>
                      <td class="text-right">{$fsc->show_numero($value->dtolineal, 2)}</td>
-                     <td class="text-right">{$fsc->show_precio($value->pvptotal, $fsc->factura->coddivisa)}</td>
+                     <td class="text-right">{$fsc->show_precio($value->pvptotal2, $fsc->factura->coddivisa)}</td>
                      <td class="text-right">{$fsc->show_numero($value->iva, 2)} %</td>
-                     <td class="text-right">{$fsc->show_numero($value->iva0(), 2)}</td>
+                     <td class="text-right">{$fsc->show_numero($value->ivalineal, 2)}</td>
                      <td class="recargo text-right">{$fsc->show_numero($value->recargo, 2)} %</td>
                      <td class="irpf text-right">{$fsc->show_numero($value->irpf, 2)} %</td>
                      <td class="text-right">{$fsc->show_precio($value->total_iva(), $fsc->factura->coddivisa)}</td>
@@ -350,7 +350,7 @@
 
                      <td class="text-right"><b>{$fsc->show_precio($fsc->factura->dtototal, $fsc->factura->coddivisa)}</b></td>
 
-                     <td class="text-right"><b>{$fsc->show_precio($fsc->factura->neto, $fsc->factura->coddivisa)}</b></td>
+                     <td class="text-right"><b>{$fsc->show_precio($fsc->factura->neto2, $fsc->factura->coddivisa)}</b></td>
                      <td class="text-right"><b>{$fsc->show_precio($fsc->factura->totaliva, $fsc->factura->coddivisa)}</b></td>
                      <td class="recargo text-right"><b>{$fsc->show_precio($fsc->factura->totalrecargo, $fsc->factura->coddivisa)}</b></td>
                      <td class="irpf text-right"><b>-{$fsc->show_precio($fsc->factura->totalirpf, $fsc->factura->coddivisa)}</b></td>
@@ -913,74 +913,43 @@
    </div>
 </form>
 
-<form action="{$fsc->url()}" method="post" class="form">
-   <input type="hidden" name="anular" value="TRUE"/>
+
    <div class="modal fade" id="modal_eliminar">
       <div class="modal-dialog">
          <div class="modal-content">
             <div class="modal-header">
                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-               <h4 class="modal-title">¿Quiere eliminar o anular esta factura?</h4>
-               {if="!in_array('editar_facturas', $GLOBALS['plugins'])"}
+
+
                <p class="help-block">
-                  Puedes editar facturas usando el plugin
-                  <a href="https://www.facturascripts.com/plugin/editar_facturas" target="_blank">editar facturas</a>.
+                  Estas Seguro Que Deseas Anular Esta Factura?
+
                </p>
-               {/if}
+
             </div>
-            <div class="modal-body bg-warning">
-               {if="$fsc->factura->idasiento"}
-                  Si decide <b>eliminar</b>, hay asociado un asiento contable que será eliminado
-                  junto con la factura. Además, si no hay asociado un {#FS_ALBARAN#} o {#FS_ALBARANES#},
-                  se restaurará el stock de los artículos.
-               {else}
-                  Si decide <b>eliminar</b>, se restaurará el stock de los artículos si no hay asociado un
-                  {#FS_ALBARAN#} o {#FS_ALBARANES#}.
-               {/if}
-               {if="!$fsc->factura->anulada"}
-                  <br/><br/>
-                  Si decide <b>anular</b> la factura se restaurará el stock, a menos que haya asociado
-                  un {#FS_ALBARAN#} o {#FS_ALBARANES#}.
-                  <br/><br/>
-                  Y si decide generarar una <b>{#FS_FACTURA_RECTIFICATIVA#}</b>, se anulará esta
-                  y se restaurará el stock de los artículos, aunque primero debe elegir la serie
-                  para la nueva {#FS_FACTURA_RECTIFICATIVA#}:
-                  <div class="form-group">
-                     <select name="codserie" class="form-control">
-                     {loop="$fsc->serie->all()"}
-                        {if="$value->codserie=='R'"}
-                        <option value="{$value->codserie}" selected="">{$value->descripcion}</option>
-                        {else}
-                        <option value="{$value->codserie}">{$value->descripcion}</option>
-                        {/if}
-                     {/loop}
-                     </select>
-                  </div>
-                  <div class="form-group">
-                     <textarea name="motivo" class="form-control" placeholder="Motivo de la anulación"></textarea>
-                  </div>
-               {/if}
-            </div>
+
             <div class="modal-footer">
-               <a class="btn btn-sm btn-danger pull-left" href="{$fsc->ppage->url()}&delete={$fsc->factura->idfactura}">
+               <a class="btn btn-sm btn-danger pull-left" href="index.php?page=factura_cliente_rent&anular={$fsc->factura->idfactura}">
                   <span class="glyphicon glyphicon-trash"></span>
-                  <span class='hidden-xs'>&nbsp;Eliminar</span>
+                  <span class='hidden-xs'>&nbsp;Si</span>
                </a>
-               {if="!$fsc->factura->anulada"}
+
+
+
                <div class="btn-group">
-                  <button type="submit" name="rectificativa" value="FALSE" class="btn btn-sm btn-warning">
-                     Anular
-                  </button>
-                  <button type="submit" name="rectificativa" value="TRUE" class="btn btn-sm btn-warning text-capitalize">
-                     {#FS_FACTURA_RECTIFICATIVA#}
-                  </button>
+                  <a class="btn btn-sm btn-success pull-left" href="index.php?page=ventas_factura&id={$fsc->factura->idfactura}">
+
+                     <span class='hidden-xs'>&nbsp;No</span>
+                  </a>
+
+
                </div>
-               {/if}
+
             </div>
          </div>
       </div>
    </div>
-</form>
+
 {else}
 <div class="thumbnail">
    <img src="{#FS_PATH#}view/img/fuuu_face.png" alt="fuuuuu"/>
