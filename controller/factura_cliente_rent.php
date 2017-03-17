@@ -12,7 +12,6 @@ require_model('factura_cliente.php');
 require_model('articulo.php');
 
 
-
 class factura_cliente_rent extends  fs_controller
 {
 
@@ -76,41 +75,8 @@ class factura_cliente_rent extends  fs_controller
         $fc = new factura_cliente();
         $this->factura = $fc->get($_GET['anular']);
 
-        if($this->factura->save())
+        if($this->factura)
         {
-
-            /// Restauramos el stock
-            $art0 = new articulo();
-
-            foreach($this->factura->get_lineas() as $linea)
-
-            {
-                if($linea->referencia)
-                {
-                    $articulo = $art0->get($linea->referencia);
-
-                    $linea->cantidad = 0;
-                    $linea->pvpsindto = 0.00;
-                    $linea->pvpunitario = 0.00;
-                    $linea->pvptotal = 0.00;
-                    $linea->dtolineal = 0.00;
-                    $linea->ivalineal = 0.00;
-                    $linea->save();
-
-
-
-                    if($articulo)
-                    {
-                        $articulo->sum_stock($this->factura->codalmacen, $linea->cantidad);
-
-
-
-
-
-
-                    }
-                }
-            }
 
         /// Ponemos valores en ceros de la factura para informes
         $this->factura->anulada = TRUE;
@@ -122,12 +88,9 @@ class factura_cliente_rent extends  fs_controller
         $this->factura->totaleuros = 0.00;
         $this->factura->neto =  0.00 ;
         $this->factura->total =  0.00 ;
-        $this->factura->dtototal =  0.00 ;
-        $this->factura->iva0 =  0.00 ;
         $this->factura->fecha_anulada = $this->today();
         $this->factura->hora_anulada = $this->hour();
         $this->factura->save();
-
 
 
          $linea_iva0 = new linea_iva_factura_cliente();
@@ -151,11 +114,38 @@ class factura_cliente_rent extends  fs_controller
          }
 
 
+        /// Restauramos el stock
+        $art0 = new articulo();
 
+
+        foreach($this->factura->get_lineas() as $linea)
+
+        {
+            if( is_null($linea->idalbaran) )
+            {
+                $articulo = $art0->get($linea->referencia);
+
+
+
+                if($articulo)
+                {
+
+                    $articulo->sum_stock($this->factura->codalmacen, $linea->cantidad);
+
+
+                    //$linea->cantidad = 0;
+                    $linea->pvpsindto = 0.00;
+                    $linea->pvpunitario = 0.00;
+                    $linea->pvptotal = 0.00;
+                    $linea->save();
+
+                }
+            }
+        }
 
         $this->new_message("Factura de venta ".$this->factura->codigo." anulada correctamente.", TRUE);
         $this->clean_last_changes();
-        header('Location:index.php?page=ventas_factura&id='.$this->factura->idfactura);
+        header('Location:index.php?page=ventas_facturas');
 
         /* else
             $this->new_error_msg("¡Imposible eliminar la factura!");*/

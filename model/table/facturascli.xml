@@ -314,11 +314,6 @@
         <nulo>YES</nulo>
     </columna>
     <columna>
-        <nombre>neto2</nombre>
-        <tipo>double precision</tipo>
-        <nulo>YES</nulo>
-    </columna>
-    <columna>
         <nombre>totaliva</nombre>
         <tipo>double precision</tipo>
         <nulo>NO</nulo>

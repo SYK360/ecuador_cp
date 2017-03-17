@@ -62,73 +62,15 @@ class linea_factura_cliente extends FacturaScripts\model\linea_factura_cliente
    {
        if( parent::save() )
         {
-            if( $this->exists() )
-
-            {
-                $sql = "UPDATE ".$this->table_name." SET idfactura = ".$this->var2str($this->idfactura)
-                    .", idalbaran = ".$this->var2str($this->idalbaran)
-                    .", idlineaalbaran = ".$this->var2str($this->idlineaalbaran)
-                    .", referencia = ".$this->var2str($this->referencia)
-                    .", descripcion = ".$this->var2str($this->descripcion)
-                    .", cantidad = ".$this->var2str($this->cantidad)
-                    .", pvpunitario = ".$this->var2str($this->pvpunitario)
-                    //TRABAJANDO..
-                    .", dtolineal = ".$this->var2str($this->dtolineal)
-                    .", pvpsindto = ".$this->var2str($this->pvpsindto)
-                    .", dtopor = ".$this->var2str($this->dtopor)
-                    .", pvptotal = ".$this->var2str($this->pvptotal)
-                    .", codimpuesto = ".$this->var2str($this->codimpuesto)
-                    .", iva = ".$this->var2str($this->iva)
-                    //WORKING...
-                    .", ivalienal = ".$this->var2str($this->ivalineal)
-                    .", recargo = ".$this->var2str($this->recargo)
-                    .", irpf = ".$this->var2str($this->irpf)
-                    .", orden = ".$this->var2str($this->orden)
-                    .", mostrar_cantidad = ".$this->var2str($this->mostrar_cantidad)
-                    .", mostrar_precio = ".$this->var2str($this->mostrar_precio)
-                    ."  WHERE idlinea = ".$this->var2str($this->idlinea).";";
-
-                return $this->db->exec($sql);
-            }else{
-
-                $sql = "INSERT INTO ".$this->table_name." (idfactura,idalbaran,idlineaalbaran,referencia,
-               descripcion,cantidad,pvpunitario,pvpsindto,dtolineal,dtopor,pvptotal,codimpuesto,iva,ivalineal,
-               recargo,irpf,orden,mostrar_cantidad,mostrar_precio) VALUES
-                      (".$this->var2str($this->idfactura)
-                    .",".$this->var2str($this->idalbaran)
-                    .",".$this->var2str($this->idlineaalbaran)
-                    .",".$this->var2str($this->referencia)
-                    .",".$this->var2str($this->descripcion)
-                    .",".$this->var2str($this->cantidad)
-                    .",".$this->var2str($this->pvpunitario)
-                    .",".$this->var2str($this->pvpsindto)
-                    //TRABAJANDO
-                    .",".$this->var2str($this->dtolineal)
-                    .",".$this->var2str($this->dtopor)
-                    .",".$this->var2str($this->pvptotal)
-                    .",".$this->var2str($this->codimpuesto)
-                    .",".$this->var2str($this->iva)
-                    .",".$this->var2str($this->ivalineal)
-                    .",".$this->var2str($this->recargo)
-                    .",".$this->var2str($this->irpf)
-                    .",".$this->var2str($this->orden)
-                    .",".$this->var2str($this->mostrar_cantidad)
-                    .",".$this->var2str($this->mostrar_precio).");";
-
-
-                if( $this->db->exec($sql) )
-                {
-                    $this->idlinea = $this->db->lastval();
-                    return TRUE;
-                }
-                else{
-                    return FALSE;
-            }
-
-       }
-   }else{
-           return FALSE;
-       }
+       $sql = "UPDATE ".$this->table_name." SET dtolineal =
+       ".$this->var2str($this->dtolineal).",
+       ivalineal = ".$this->var2str($this->ivalineal)."
+       ;";
+       return $this->db->exec($sql);
+        }else{
+            
+            return FALSE;
+        }
    }
     
 }

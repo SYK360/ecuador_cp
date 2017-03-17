@@ -47,7 +47,6 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
     public $placa_ve_air;
     public $dtototal;
     public $iva0;
-    public $neto2;
 
     public function __construct($a = FALSE){
 
@@ -72,7 +71,6 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
             $this->placa_ve_air = $a['placa_ve_air'];
             $this->dtototal = $a['dtototal'];
             $this->iva0 = $a['iva0'];
-            $this->neto2 = $a['neto2'];
         }
         else
         {
@@ -96,7 +94,6 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
             $this->placa_ve_air = NULL;
             $this->dtototal = 0;
             $this->iva0 = 0;
-            $this->neto2 = 0;
         }
 
 }
@@ -125,7 +122,6 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
                             $lineasi[$i]->dtototal += $l->dtolineal;
                             //WORKING..
                             $lineasi[$i]->iva0 += $l->iva0;
-                            $lineasi[$i]->neto2 += $l->neto2;
                             $lineasi[$i]->totaliva += ($l->pvptotal*$l->iva)/100;
                             $lineasi[$i]->totalrecargo += ($l->pvptotal*$l->recargo)/100;
                         }
@@ -143,7 +139,6 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
                         $lineasi[$i]->dtototal = $l->dtolineal;
                         //WORKING..
                         $lineasi[$i]->iva0 += $l->iva0;
-                        $lineas[$i]->neto2 += $l->neto2;
                         $lineasi[$i]->totaliva = ($l->pvptotal*$l->iva)/100;
                         $lineasi[$i]->totalrecargo = ($l->pvptotal*$l->recargo)/100;
                     }
@@ -285,7 +280,6 @@ class factura_cliente extends FacturaScripts\model\factura_cliente
                 .", placa_ve_air = ".$this->var2str($this->placa_ve_air)
                 .", dtototal = ".$this->var2str($this->dtototal)
                 .", iva0 = ".$this->var2str($this->iva0)
-                .", neto2 = ".$this->var2str($this->neto2)
                 ."  WHERE idfactura = ".$this->var2str($this->idfactura).";";
 
             return $this->db->exec($sql);
